@@ -1,16 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { format } from "date-fns";
-import { Search, Plus, FolderOpen } from "lucide-react";
+import { Search, Plus, FolderOpen, Ellipsis } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { CreateFolderModal } from "@/components/modals/CreateFolderModal";
 import { useNoteStore } from "@/stores/noteStore";
 import { Note } from "@/stores/types";
@@ -20,6 +12,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
+import { NoteCard } from "@/components/cards/NoteCard";
+import { DashboardEmptyState } from "@/components/sections/DashboardEmptyState";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -56,7 +51,7 @@ export default function Dashboard() {
   const handleCreateNote = (folderId: string | null) => {
     try {
       const newNote = createNote({
-        title: "Untitled Note",
+        title: "",
         content: "",
         folderId: folderId,
       });
@@ -69,26 +64,33 @@ export default function Dashboard() {
   const handleCreateFolder = (name: string) => {
     try {
       const newFolder = createFolder(name);
-      console.log("Created new folder:", newFolder);
+      if (!newFolder) {
+        throw new Error("Failed to create folder");
+      }
+      toast.success("Folder created");
       return newFolder;
     } catch (error) {
       console.error("Failed to create folder:", error);
+      toast.error("Failed to create folder");
       throw error;
     }
   };
 
-  const handleDeleteNote = (noteId: string) => {
+  const handleDeleteNote = (noteId: string, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent card click event
     deleteNote(noteId);
+    toast.success("Note deleted");
   };
 
   const handleDeleteFolder = (folderId: string) => {
     deleteFolder(folderId);
+    toast.success("Folder deleted");
   };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">My Notes</h1>
+        <h1 className="text-3xl font-bold">Noteworthy</h1>
         <div className="flex gap-2">
           <CreateFolderModal onCreateFolder={handleCreateFolder} />
         </div>
@@ -110,42 +112,13 @@ export default function Dashboard() {
         {notesByFolder["unfiled"]?.length > 0 && (
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">Unfiled Notes</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {filterNotes(notesByFolder["unfiled"]).map((note) => (
-                <Card
+                <NoteCard
                   key={note.id}
-                  className="hover:shadow-lg transition-shadow"
-                >
-                  <CardHeader>
-                    <CardTitle className="line-clamp-1">{note.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground line-clamp-3">
-                      {note.content.replace(/<[^>]*>/g, "")}
-                    </p>
-                  </CardContent>
-                  <CardFooter className="flex justify-between text-sm text-muted-foreground">
-                    <span>
-                      {format(new Date(note.updatedAt), "MMM d, yyyy")}
-                    </span>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/note/${note.id}`)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteNote(note.id)}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </CardFooter>
-                </Card>
+                  note={note}
+                  onDelete={handleDeleteNote}
+                />
               ))}
             </div>
           </div>
@@ -179,13 +152,15 @@ export default function Dashboard() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm">
-                        Options
+                        <Ellipsis className="mr-2 h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <DropdownMenuItem
                         onClick={() => handleDeleteFolder(folder.id)}
+                        className="text-red-500"
                       >
+                        <FolderOpen className="h-4 w-4" />
                         Delete Folder
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -194,48 +169,17 @@ export default function Dashboard() {
               </div>
 
               {filteredNotes.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {filteredNotes.map((note) => (
-                    <Card
+                    <NoteCard
                       key={note.id}
-                      className="hover:shadow-lg transition-shadow"
-                    >
-                      <CardHeader>
-                        <CardTitle className="line-clamp-1">
-                          {note.title}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground line-clamp-3">
-                          {note.content.replace(/<[^>]*>/g, "")}
-                        </p>
-                      </CardContent>
-                      <CardFooter className="flex justify-between text-sm text-muted-foreground">
-                        <span>
-                          {format(new Date(note.updatedAt), "MMM d, yyyy")}
-                        </span>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => navigate(`/note/${note.id}`)}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteNote(note.id)}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      </CardFooter>
-                    </Card>
+                      note={note}
+                      onDelete={handleDeleteNote}
+                    />
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-sm text-left">
                   No notes in this folder
                 </p>
               )}
@@ -245,17 +189,7 @@ export default function Dashboard() {
       </div>
 
       {notes.length === 0 && folders.length === 0 && (
-        <div className="text-center py-12">
-          <h3 className="text-xl font-semibold mb-2">
-            No notes or folders yet
-          </h3>
-          <p className="text-muted-foreground mb-4">
-            Create your first folder to get started
-          </p>
-          <div className="flex justify-center gap-4">
-            <CreateFolderModal onCreateFolder={handleCreateFolder} />
-          </div>
-        </div>
+        <DashboardEmptyState onCreateFolder={handleCreateFolder} />
       )}
     </div>
   );

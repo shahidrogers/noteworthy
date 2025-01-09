@@ -63,7 +63,6 @@ The test suite covers:
 - State management logic
 - Note CRUD operations
 - Search functionality
-- Theme switching
 - Data persistence
 
 ## Build

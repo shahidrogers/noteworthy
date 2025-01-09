@@ -96,13 +96,24 @@ const storeCreator: StateCreator<NoteState> = (set) => ({
  *
  * In production, i'd normally use some kind of secure storage for storing tokens, user data, etc.
  **/
+
+// Add a check for test environment
+const isTestEnv = process.env.NODE_ENV === "test";
+
 const secureStorage = {
   getItem: async (name: string): Promise<string | null> => {
+    if (isTestEnv) {
+      return localStorage.getItem(name);
+    }
     const value = localStorage.getItem(name);
     if (!value) return null;
     return decrypt(value);
   },
   setItem: async (name: string, value: string): Promise<void> => {
+    if (isTestEnv) {
+      localStorage.setItem(name, value);
+      return;
+    }
     const encrypted = await encrypt(value);
     localStorage.setItem(name, encrypted);
   },

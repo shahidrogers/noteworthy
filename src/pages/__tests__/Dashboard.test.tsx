@@ -28,6 +28,8 @@ import userEvent from "@testing-library/user-event";
 // Mock the useNoteStore hook
 jest.mock("@/stores/noteStore");
 
+// Ensure that there's no individual mocking of crypto here.
+
 const mockedUseNoteStore = useNoteStore as jest.MockedFunction<
   typeof useNoteStore
 >;

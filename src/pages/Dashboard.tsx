@@ -146,7 +146,7 @@ export default function Dashboard() {
                     size="sm"
                     onClick={() => handleCreateNote(folder.id)}
                   >
-                    <Plus className="mr-2 h-4 w-4" />
+                    <Plus className="h-4 w-4" />
                     New Note
                   </Button>
                   <DropdownMenu>

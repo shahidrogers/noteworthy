@@ -20,6 +20,19 @@ A simple note-taking application.
 - Rich text support for note content
 - Local storage persistence
 
+## State Synchronization
+
+Noteworthy uses the [BroadcastChannel API](https://developer.mozilla.org/en-US/docs/Web/API/Broadcast_Channel_API) to synchronize state across multiple tabs/windows. This means any changes made to notes or folders in one tab are instantly reflected in all other open instances of the app.
+
+### Why BroadcastChannel?
+
+- **Simplicity**: No backend required, perfect for a client-side only app
+- **Real-time**: Updates are instantaneous across tabs
+- **Low overhead**: Native browser API with minimal setup
+- **Perfect for local-first**: Aligns with our local storage persistence strategy
+
+While solutions like tRPC or WebSocket would be more appropriate for client-server architectures, BroadcastChannel is the ideal choice for this local-first application where all data lives in the browser.
+
 ## Getting Started
 
 ### Prerequisites
@@ -31,7 +44,7 @@ A simple note-taking application.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/noteworthy.git
+git clone https://github.com/shahidrogers/noteworthy.git
 
 # Install dependencies
 npm install

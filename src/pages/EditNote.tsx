@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FolderIcon } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Card,
   CardHeader,
@@ -66,12 +66,8 @@ export default function EditNote() {
     if (!noteData?.title.trim() && !noteData?.content.trim()) {
       setIsLoading(true);
       if (noteData?.id) {
+        deleteNote(noteData.id);
         navigate("/");
-        setTimeout(() => {
-          if (mounted.current) {
-            deleteNote(noteData.id);
-          }
-        }, 100);
       } else {
         navigate("/");
       }
@@ -88,12 +84,8 @@ export default function EditNote() {
   const handleDelete = () => {
     if (!noteData?.id) return;
     setIsLoading(true);
+    deleteNote(noteData.id);
     navigate("/");
-    setTimeout(() => {
-      if (mounted.current) {
-        deleteNote(noteData.id);
-      }
-    }, 100);
 
     toast.success("Note deleted");
   };
@@ -190,7 +182,7 @@ export default function EditNote() {
             onChange={(e) => setDraftTitle(e.target.value)}
             className="flex-1 text-lg"
             placeholder="Enter note title..."
-            autoFocus={noteData.title === ""}
+            autoFocus={noteData?.title === ""}
           />
         </motion.div>
         <TooltipProvider>
@@ -274,7 +266,7 @@ export default function EditNote() {
           editorContentClassName="p-5"
           output="html"
           placeholder="Type your description here..."
-          autofocus={noteData.title !== ""}
+          autofocus={noteData?.title !== ""}
           editable={true}
           editorClassName="focus:outline-none"
         />
@@ -288,7 +280,7 @@ export default function EditNote() {
       >
         <div className="w-full flex flex-wrap items-center gap-x-3 gap-y-1">
           <span className="whitespace-nowrap">
-            Last updated: {formatDate(noteData.updatedAt)}
+            Last updated: {noteData ? formatDate(noteData.updatedAt) : ""}
           </span>
           <span className="hidden sm:inline">•</span>
           {(() => {
@@ -312,9 +304,12 @@ export default function EditNote() {
           <div className="flex items-center gap-2">
             <FolderIcon className="h-4 w-4 text-muted-foreground shrink-0" />
             <Select
-              value={noteData.folderId || "none"}
+              value={noteData?.folderId || "none"}
               onValueChange={(value) => {
-                moveNoteToFolder(noteData.id, value === "none" ? null : value);
+                moveNoteToFolder(
+                  noteData?.id ?? "",
+                  value === "none" ? null : value
+                );
                 toast.success("Note moved to folder");
               }}
             >

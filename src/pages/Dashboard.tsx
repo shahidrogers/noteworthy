@@ -118,7 +118,7 @@ export default function Dashboard() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="container mx-auto p-6 space-y-6"
+      className="container mx-auto p-6 space-y-6 flex flex-col min-h-screen"
     >
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Noteworthy</h1>
@@ -140,11 +140,15 @@ export default function Dashboard() {
         />
       </div>
 
+      {notes.length === 0 && folders.length === 0 && (
+        <DashboardEmptyState onCreateFolder={handleCreateFolder} />
+      )}
+
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="space-y-8"
+        className="space-y-8 flex-grow"
       >
         {/* First, show unfiled notes if they exist */}
         {notesByFolder["unfiled"]?.length > 0 && (
@@ -200,9 +204,18 @@ export default function Dashboard() {
         })}
       </motion.div>
 
-      {notes.length === 0 && folders.length === 0 && (
-        <DashboardEmptyState onCreateFolder={handleCreateFolder} />
-      )}
+      {/* Footer */}
+      <footer className="text-center mt-auto py-4">
+        <p className="text-xs text-muted-foreground">
+          noteworthy v1.0 &copy; 2025{" "}
+          <a
+            href="https://www.shah1d.com"
+            className="text-gray-500 hover:underline"
+          >
+            Shahid Rogers
+          </a>
+        </p>
+      </footer>
     </motion.div>
   );
 }

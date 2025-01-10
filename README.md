@@ -1,7 +1,8 @@
 # Noteworthy App
 
-A simple note-taking application using React 18 + Vite + Tailwind/Shadcn.
-Deployed onto Netlify.
+A super simple note-taking application using React 18 + Vite + Tailwind/Shadcn.
+
+Deployed onto Netlify:
 
 [View deployed app here](https://noteworthy-local.netlify.app/)
 
@@ -43,11 +44,13 @@ You can find me at:
 - Rich text support for note content
 - Local storage persistence (basic security with AES-GCM encryption)
 - [State synchronization](#state-synchronization) (Cross-tab/window only)
+- [Conflict resolution](#conflict-resolution) (Basic, just comparing last updated time)
 
 ## Future enhancements
 
 - [ ] Drag + drop capability to re-order notes/folders and to move notes from one folder to another
-- [ ] Conflict resolution
+- [ ] Add confirmation for deletions - "Are you sure you want to delete xx?"
+- [ ] Publish / Sharing capability - share as a link, e-mail, etc.
 
 ## State Synchronization
 

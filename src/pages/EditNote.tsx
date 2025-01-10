@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FolderIcon } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function EditNote() {
   const { id } = useParams();
@@ -104,7 +105,12 @@ export default function EditNote() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-4 h-full text-left">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="container mx-auto p-6 space-y-4 h-full text-left"
+    >
       <ConfirmCancelModal
         open={showConfirmModal}
         onOpenChange={setShowConfirmModal}
@@ -117,23 +123,38 @@ export default function EditNote() {
           setShowConfirmModal(false);
         }}
       />
-      <div className="flex items-center gap-4">
-        <Input
-          ref={titleInputRef}
-          value={draftTitle}
-          onChange={(e) => setDraftTitle(e.target.value)}
-          className="flex-1 text-lg"
-          placeholder="Enter note title..."
-          autoFocus={noteData.title === ""}
-        />
+      <motion.div
+        initial={{ y: -20 }}
+        animate={{ y: 0 }}
+        className="flex items-center gap-4"
+      >
+        <motion.div whileTap={{ scale: 0.995 }} className="flex-1">
+          <Input
+            ref={titleInputRef}
+            value={draftTitle}
+            onChange={(e) => setDraftTitle(e.target.value)}
+            className="flex-1 text-lg"
+            placeholder="Enter note title..."
+            autoFocus={noteData.title === ""}
+          />
+        </motion.div>
         <TooltipProvider>
-          <div className="flex gap-2">
+          <motion.div
+            initial={{ x: 20 }}
+            animate={{ x: 0 }}
+            className="flex gap-2"
+          >
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button onClick={handleSave} className="gap-2">
-                  <Save className="h-4 w-4" />
-                  Save
-                </Button>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button onClick={handleSave} className="gap-2">
+                    <Save className="h-4 w-4" />
+                    Save
+                  </Button>
+                </motion.div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Save changes</p>
@@ -142,14 +163,19 @@ export default function EditNote() {
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  onClick={handleCancel}
-                  size="icon"
-                  title="Cancel"
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <X className="h-4 w-4" />
-                </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleCancel}
+                    size="icon"
+                    title="Cancel"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </motion.div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Cancel editing</p>
@@ -158,38 +184,53 @@ export default function EditNote() {
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  onClick={handleDelete}
-                  size="icon"
-                  className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                  title="Delete"
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleDelete}
+                    size="icon"
+                    className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                    title="Delete"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </motion.div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Delete note</p>
               </TooltipContent>
             </Tooltip>
-          </div>
+          </motion.div>
         </TooltipProvider>
-      </div>
+      </motion.div>
 
-      <MinimalTiptapEditor
-        value={draftContent}
-        onChange={(content) => setDraftContent(content as string)}
-        className="w-full"
-        editorContentClassName="p-5"
-        output="html"
-        placeholder="Type your description here..."
-        autofocus={noteData.title !== ""}
-        editable={true}
-        editorClassName="focus:outline-none"
-      />
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.1 }}
+      >
+        <MinimalTiptapEditor
+          value={draftContent}
+          onChange={(content) => setDraftContent(content as string)}
+          className="w-full"
+          editorContentClassName="p-5"
+          output="html"
+          placeholder="Type your description here..."
+          autofocus={noteData.title !== ""}
+          editable={true}
+          editorClassName="focus:outline-none"
+        />
+      </motion.div>
 
-      {/* Footer */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 text-sm text-muted-foreground border-t pt-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="flex flex-col sm:flex-row items-start sm:items-center gap-4 text-sm text-muted-foreground border-t pt-4"
+      >
         <div className="w-full flex flex-wrap items-center gap-x-3 gap-y-1">
           <span className="whitespace-nowrap">
             Last updated: {formatDate(noteData.updatedAt)}
@@ -236,7 +277,7 @@ export default function EditNote() {
             </Select>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

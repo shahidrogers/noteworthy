@@ -1,5 +1,15 @@
 # Noteworthy App
 
+## Table of Contents
+
+- [Tech Stack](#tech-stack)
+- [Features](#features)
+- [Future enhancements](#future-enhancements)
+- [State Synchronization](#state-synchronization)
+- [Getting Started](#getting-started)
+- [Testing](#testing)
+- [Build](#build)
+
 A simple note-taking application.
 
 ## Tech Stack
@@ -19,6 +29,11 @@ A simple note-taking application.
 - Search functionality
 - Rich text support for note content
 - Local storage persistence (basic security with AES-GCM encryption)
+
+## Future enhancements
+
+- Drag + drop capability to re-order notes/folders and to move notes from one folder to another
+- Conflict resolution
 
 ## State Synchronization
 
@@ -86,4 +101,8 @@ npm run build
 
 # Preview production build
 npm run preview
+```
+
+```
+
 ```

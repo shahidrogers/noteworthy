@@ -9,6 +9,7 @@
  *    - Update note title and shows success toast
  *    - Update note content through editor
  *    - Show unsaved changes confirmation modal when cancelling
+ *    - Move note to a different folder
  *
  * 3. Note Deletion:
  *    - Handle note deletion
@@ -65,9 +66,17 @@ describe("EditNote", () => {
     updatedAt: new Date(),
   };
 
+  const mockFolder = {
+    id: "test-folder-1",
+    name: "Test Folder",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
   beforeEach(() => {
     setupMockStore({
       notes: [mockNote],
+      folders: [mockFolder], // Add mock folder to store
       actions: {
         createNote: jest.fn(),
         updateNote: jest.fn(),
@@ -76,6 +85,7 @@ describe("EditNote", () => {
         deleteFolder: jest.fn(),
         setActiveNote: jest.fn(),
         renameFolder: jest.fn(),
+        moveNoteToFolder: jest.fn(),
       },
     });
     // Clear all mocks before each test
@@ -169,5 +179,24 @@ describe("EditNote", () => {
 
     expect(screen.getByText("Note not found.")).toBeInTheDocument();
     expect(screen.getByText("Back to Dashboard")).toBeInTheDocument();
+  });
+
+  it("handles moving note to a different folder", async () => {
+    renderEditNote();
+
+    // Open the folder select
+    const folderSelect = screen.getByRole("combobox");
+    fireEvent.click(folderSelect);
+
+    // Select the test folder
+    const folderOption = screen.getByText("Test Folder");
+    fireEvent.click(folderOption);
+
+    await waitFor(() => {
+      expect(
+        useNoteStore.getState().actions.moveNoteToFolder
+      ).toHaveBeenCalledWith("test-note-1", "test-folder-1");
+      expect(toast.success).toHaveBeenCalledWith("Note moved to folder");
+    });
   });
 });

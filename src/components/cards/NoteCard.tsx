@@ -3,13 +3,13 @@ import { Trash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Note } from "@/stores/types";
+import { motion } from "framer-motion";
 
 interface NoteCardProps {
   note: Note;
@@ -19,10 +19,30 @@ interface NoteCardProps {
 export function NoteCard({ note, onDelete }: NoteCardProps) {
   const navigate = useNavigate();
 
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.3,
+      },
+    },
+    hover: {
+      y: -5,
+      transition: {
+        duration: 0.2,
+      },
+    },
+  };
+
   return (
-    <Card
-      className="hover:shadow-lg transition-shadow cursor-pointer"
+    <motion.div
+      variants={cardVariants}
+      whileHover="hover"
+      layout
       onClick={() => navigate(`/note/${note.id}`)}
+      className="group relative rounded-lg border p-4 space-y-2 hover:border-primary cursor-pointer"
     >
       <CardHeader className="text-left py-3 px-4">
         <CardTitle className="line-clamp-1 text-base">
@@ -52,6 +72,6 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
           </Button>
         </div>
       </CardFooter>
-    </Card>
+    </motion.div>
   );
 }

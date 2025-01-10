@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 import { useNoteStore } from "@/stores/noteStore";
 import { Note } from "@/stores/types";
@@ -38,12 +39,20 @@ export default function Dashboard() {
 
   // Filter notes based on search query
   const filterNotes = (notes: Note[]) => {
-    if (!searchQuery) return notes;
-    return notes.filter(
-      (note) =>
-        note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        note.content.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filtered = !searchQuery
+      ? notes
+      : notes.filter(
+          (note) =>
+            note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            note.content.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+    // Sort notes by latest first
+    return filtered.sort((a, b) => {
+      const dateA = a.updatedAt || a.createdAt;
+      const dateB = b.updatedAt || b.createdAt;
+      return new Date(dateB).getTime() - new Date(dateA).getTime();
+    });
   };
 
   const handleCreateNote = (folderId: string | null) => {
@@ -94,8 +103,23 @@ export default function Dashboard() {
     setEditingFolderId(null);
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="container mx-auto p-6 space-y-6"
+    >
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Noteworthy</h1>
         <div className="flex gap-2">
@@ -116,8 +140,12 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Display all folders, even empty ones */}
-      <div className="space-y-8">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="space-y-8"
+      >
         {/* First, show unfiled notes if they exist */}
         {notesByFolder["unfiled"]?.length > 0 && (
           <div className="space-y-4">
@@ -170,11 +198,11 @@ export default function Dashboard() {
             </div>
           );
         })}
-      </div>
+      </motion.div>
 
       {notes.length === 0 && folders.length === 0 && (
         <DashboardEmptyState onCreateFolder={handleCreateFolder} />
       )}
-    </div>
+    </motion.div>
   );
 }

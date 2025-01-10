@@ -16,6 +16,7 @@ export function setupMockStore(
       deleteFolder: jest.fn(),
       setActiveNote: jest.fn(),
       renameFolder: jest.fn(),
+      moveNoteToFolder: jest.fn(),
     },
     ...customState,
   });

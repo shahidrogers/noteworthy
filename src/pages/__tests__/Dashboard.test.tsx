@@ -51,6 +51,7 @@ describe("Dashboard", () => {
         deleteFolder: jest.fn(),
         setActiveNote: jest.fn(),
         renameFolder: jest.fn(),
+        moveNoteToFolder: jest.fn(),
       },
     });
     const { createFolder } = useNoteStore.getState().actions;
@@ -98,6 +99,7 @@ describe("Dashboard", () => {
         deleteFolder: jest.fn(),
         setActiveNote: jest.fn(),
         renameFolder: jest.fn(),
+        moveNoteToFolder: jest.fn(),
       },
     });
     const { deleteFolder } = useNoteStore.getState().actions;
@@ -139,6 +141,7 @@ describe("Dashboard", () => {
         deleteFolder: jest.fn(),
         setActiveNote: jest.fn(),
         renameFolder,
+        moveNoteToFolder: jest.fn(),
       },
     });
 
@@ -194,6 +197,7 @@ describe("Dashboard", () => {
         deleteFolder: jest.fn(),
         setActiveNote: jest.fn(),
         renameFolder: jest.fn(),
+        moveNoteToFolder: jest.fn(),
       },
     });
 
@@ -232,6 +236,7 @@ describe("Dashboard", () => {
         deleteFolder: jest.fn(),
         setActiveNote: jest.fn(),
         renameFolder: jest.fn(),
+        moveNoteToFolder: jest.fn(),
       },
     });
 
@@ -276,6 +281,7 @@ describe("Dashboard", () => {
         deleteFolder: jest.fn(),
         setActiveNote: jest.fn(),
         renameFolder: jest.fn(),
+        moveNoteToFolder: jest.fn(),
       },
     });
 
@@ -307,6 +313,7 @@ describe("Dashboard", () => {
         deleteFolder: jest.fn(),
         setActiveNote: jest.fn(),
         renameFolder: jest.fn(),
+        moveNoteToFolder: jest.fn(),
       },
     });
 
@@ -316,7 +323,14 @@ describe("Dashboard", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/create your first folder/i)).toBeInTheDocument();
+    expect(screen.getByText("No notes or folders yet")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Create your first folder to start organizing your notes. You can create as many folders as you need."
+      )
+    ).toBeInTheDocument();
+    // Verify the icon is present
+    expect(document.querySelector("svg")).toBeInTheDocument();
   });
 
   it("should display notes grouped by folders", () => {
@@ -359,6 +373,7 @@ describe("Dashboard", () => {
         deleteFolder: jest.fn(),
         setActiveNote: jest.fn(),
         renameFolder: jest.fn(),
+        moveNoteToFolder: jest.fn(),
       },
     });
 

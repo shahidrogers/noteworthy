@@ -2,19 +2,27 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useNoteStore } from "@/stores/noteStore";
 import { Note } from "@/stores/types";
-import { format } from "date-fns";
 import { Save, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MinimalTiptapEditor } from "@/components/minimal-tiptap";
 import { ConfirmCancelModal } from "@/components/modals/ConfirmCancelModal";
 import { toast } from "sonner";
+import { formatDate, getTextStats } from "@/utils/formatters";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { FolderIcon } from "lucide-react";
 
 export default function EditNote() {
   const { id } = useParams();
@@ -23,6 +31,10 @@ export default function EditNote() {
   const updateNote = useNoteStore((state) => state.actions.updateNote);
   const deleteNote = useNoteStore((state) => state.actions.deleteNote);
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const folders = useNoteStore((state) => state.folders);
+  const moveNoteToFolder = useNoteStore(
+    (state) => state.actions.moveNoteToFolder
+  );
 
   const [noteData, setNoteData] = useState<Note | null>(null);
   const [draftTitle, setDraftTitle] = useState("");
@@ -176,9 +188,55 @@ export default function EditNote() {
         editorClassName="focus:outline-none"
       />
 
-      <p className="text-sm text-muted-foreground">
-        Last updated: {format(new Date(noteData.updatedAt), "MMM d, yyyy")}
-      </p>
+      {/* Footer */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 text-sm text-muted-foreground border-t pt-4">
+        <div className="w-full flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="whitespace-nowrap">
+            Last updated: {formatDate(noteData.updatedAt)}
+          </span>
+          <span className="hidden sm:inline">•</span>
+          {(() => {
+            const stats = getTextStats(draftContent);
+            return (
+              <>
+                <span className="whitespace-nowrap">{stats.words} words</span>
+                <span className="hidden sm:inline">•</span>
+                <span className="whitespace-nowrap">
+                  {stats.characters} characters
+                </span>
+                <span className="hidden sm:inline">•</span>
+                <span className="whitespace-nowrap">
+                  {stats.readingTime} min read
+                </span>
+              </>
+            );
+          })()}
+        </div>
+        <div className="w-full sm:w-auto">
+          <div className="flex items-center gap-2">
+            <FolderIcon className="h-4 w-4 text-muted-foreground shrink-0" />
+            <Select
+              value={noteData.folderId || "none"}
+              onValueChange={(value) => {
+                moveNoteToFolder(noteData.id, value === "none" ? null : value);
+                toast.success("Note moved to folder");
+              }}
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Select a folder" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No folder</SelectItem>
+                {folders.map((folder) => (
+                  <SelectItem key={folder.id} value={folder.id}>
+                    {folder.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

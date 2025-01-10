@@ -18,11 +18,11 @@ A simple note-taking application.
 - Organize notes with folders
 - Search functionality
 - Rich text support for note content
-- Local storage persistence
+- Local storage persistence (basic security with AES-GCM encryption)
 
 ## State Synchronization
 
-Noteworthy uses the [BroadcastChannel API](https://developer.mozilla.org/en-US/docs/Web/API/Broadcast_Channel_API) to synchronize state across multiple tabs/windows. This means any changes made to notes or folders in one tab are instantly reflected in all other open instances of the app.
+This app uses the [BroadcastChannel API](https://developer.mozilla.org/en-US/docs/Web/API/Broadcast_Channel_API) to synchronize state across multiple tabs/windows. This means any changes made to notes or folders in one tab are instantly reflected in all other open instances of the app.
 
 ### Why BroadcastChannel?
 

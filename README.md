@@ -32,7 +32,7 @@ You can find me at:
 - **State Management**: Zustand
 - **Testing**: Jest + React Testing Library
 - **Styling**: TailwindCSS + Shadcn (using some RadixUI primitives) + Lucide-react icons
-- **Aninmation**: framer-motion
+- **Animation**: framer-motion
 - **Opinionated Toasts**: Sonner
 - **Rich Text Editor**: Tiptap + minimal-tiptap
 

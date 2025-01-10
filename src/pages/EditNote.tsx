@@ -149,6 +149,7 @@ export default function EditNote() {
   const handleSave = () => {
     if (!noteData) return;
 
+    // conflict resolution: check if the note has been updated since we loaded it
     const currentNote = notes.find((n) => n.id === noteData.id);
     if (currentNote && new Date(currentNote.updatedAt) > initialLoadTime) {
       setShowConflictModal(true);

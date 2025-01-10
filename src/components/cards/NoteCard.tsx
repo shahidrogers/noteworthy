@@ -42,14 +42,14 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
       whileHover="hover"
       layout
       onClick={() => navigate(`/note/${note.id}`)}
-      className="group relative rounded-lg border p-4 space-y-2 hover:border-primary cursor-pointer"
+      className="group relative rounded-lg border p-4 flex flex-col min-h-[160px] hover:border-primary cursor-pointer"
     >
       <CardHeader className="text-left py-3 px-4">
         <CardTitle className="line-clamp-1 text-base">
           {note.title || "Untitled"}
         </CardTitle>
       </CardHeader>
-      <CardContent className="text-left py-0 px-4">
+      <CardContent className="text-left py-0 px-4 flex-1">
         <p className="text-muted-foreground text-sm line-clamp-1 leading-normal">
           {note.content
             .replace(/<[^>]*>/g, " ")
@@ -57,7 +57,7 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
             .trim()}
         </p>
       </CardContent>
-      <CardFooter className="flex justify-between text-xs text-muted-foreground py-3 px-4">
+      <CardFooter className="flex justify-between text-xs text-muted-foreground py-3 px-4 mt-auto">
         <span className="bg-gray-100 text-black-900 text-xs mr-2 px-2.5 py-0.5 rounded">
           {format(new Date(note.updatedAt), "h:mma, MMM d yyyy")}
         </span>

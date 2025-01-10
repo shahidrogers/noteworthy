@@ -19,6 +19,7 @@ You can find me at:
 - [Features](#features)
 - [Future enhancements](#future-enhancements)
 - [State Synchronization](#state-synchronization)
+- [Conflict Resolution](#conflict-resolution)
 - [Getting Started](#getting-started)
 - [Testing](#testing)
 - [Build](#build)
@@ -60,6 +61,24 @@ This app uses the [BroadcastChannel API](https://developer.mozilla.org/en-US/doc
 - **Perfect for local-first**: Aligns with our local storage persistence strategy
 
 While solutions like tRPC or WebSocket would be more appropriate for client-server architectures, BroadcastChannel is the ideal choice for this local-first application where all data lives in the browser.
+
+## Conflict Resolution
+
+I have implemented a super simple "conflict detection mechanism" when editing notes.
+
+When you open a note, the app stores the "initial load time" of the note.
+
+When you are saving a note, it compares:
+
+- The initial load time of the note
+- The last update time of the current note version
+
+If a newer version is detected (modified in another tab), a modal/dialog appears with 2 options:
+
+- Override: Save your current changes, overwriting the newer version
+- Load New: Discard your changes and load the latest version
+
+This approach should be simple enough for users to be aware of concurrent modifications and avoid unexpected changes in their notes.
 
 ## Getting Started
 

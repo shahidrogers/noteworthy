@@ -4,6 +4,13 @@ A simple note-taking application using React 18 + Vite + Tailwind/Shadcn.
 
 [View deployed app here](https://noteworthy-local.netlify.app/)
 
+## Contact
+
+You can find me at:
+[Website](https://www.shah1d.com)
+[LinkedIn](https://www.linkedin.com/in/shahidrogers/)
+[E-mail](mailto:shahidrogers@gmail.com)
+
 ## Table of Contents
 
 - [Tech Stack](#tech-stack)
@@ -99,8 +106,4 @@ npm run build
 
 # Preview production build
 npm run preview
-```
-
-```
-
 ```

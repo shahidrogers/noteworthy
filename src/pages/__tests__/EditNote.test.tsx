@@ -177,8 +177,15 @@ describe("EditNote", () => {
     useNoteStore.setState({ notes: [] });
     renderEditNote();
 
-    expect(screen.getByText("Note not found.")).toBeInTheDocument();
+    expect(screen.getByText("Note not found")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "The note you're looking for doesn't exist or has been deleted."
+      )
+    ).toBeInTheDocument();
     expect(screen.getByText("Back to Dashboard")).toBeInTheDocument();
+    // Verify icon is present
+    expect(screen.getByTestId("file-question-icon")).toBeInTheDocument();
   });
 
   it("handles moving note to a different folder", async () => {

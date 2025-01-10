@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useNoteStore } from "@/stores/noteStore";
 import { Note } from "@/stores/types";
-import { Save, X, Trash2 } from "lucide-react";
+import { Save, X, Trash2, FileQuestion } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MinimalTiptapEditor } from "@/components/minimal-tiptap";
@@ -24,6 +24,13 @@ import {
 } from "@/components/ui/select";
 import { FolderIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 
 export default function EditNote() {
   const { id } = useParams();
@@ -41,6 +48,14 @@ export default function EditNote() {
   const [draftTitle, setDraftTitle] = useState("");
   const [draftContent, setDraftContent] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const mounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   const hasUnsavedChanges = () => {
     if (!noteData) return false;
@@ -49,11 +64,17 @@ export default function EditNote() {
 
   const handleCancel = () => {
     if (!noteData?.title.trim() && !noteData?.content.trim()) {
-      // Delete note if both title and content are empty
+      setIsLoading(true);
       if (noteData?.id) {
-        deleteNote(noteData.id);
+        navigate("/");
+        setTimeout(() => {
+          if (mounted.current) {
+            deleteNote(noteData.id);
+          }
+        }, 100);
+      } else {
+        navigate("/");
       }
-      navigate("/");
       return;
     }
 
@@ -66,9 +87,15 @@ export default function EditNote() {
 
   const handleDelete = () => {
     if (!noteData?.id) return;
-    deleteNote(noteData.id);
-    toast.success("Note deleted");
+    setIsLoading(true);
     navigate("/");
+    setTimeout(() => {
+      if (mounted.current) {
+        deleteNote(noteData.id);
+      }
+    }, 100);
+
+    toast.success("Note deleted");
   };
 
   useEffect(() => {
@@ -83,15 +110,43 @@ export default function EditNote() {
     }
   }, [id, notes]);
 
-  if (!noteData) {
+  if (!noteData && !isLoading) {
     return (
-      <div className="container mx-auto p-6">
-        <p className="text-lg">Note not found.</p>
-        <Button variant="ghost" onClick={() => navigate("/")}>
-          Back to Dashboard
-        </Button>
-      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+        className="container mx-auto p-6"
+      >
+        <Card className="w-full max-w-md mx-auto">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileQuestion
+                className="h-5 w-5"
+                data-testid="file-question-icon"
+              />
+              Note not found
+            </CardTitle>
+            <CardDescription>
+              The note you're looking for doesn't exist or has been deleted.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              variant="default"
+              onClick={() => navigate("/")}
+              className="w-full"
+            >
+              Back to Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </motion.div>
     );
+  }
+
+  if (isLoading) {
+    return null; // or a loading spinner if you prefer
   }
 
   const handleSave = () => {

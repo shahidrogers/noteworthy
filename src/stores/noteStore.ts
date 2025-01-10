@@ -19,6 +19,7 @@ interface NoteState {
     createFolder: (name: string) => Folder;
     deleteFolder: (id: string) => void;
     setActiveNote: (id: string | null) => void;
+    renameFolder: (id: string, newName: string) => void;
   };
 }
 
@@ -86,6 +87,13 @@ const storeCreator: StateCreator<NoteState> = (set) => ({
       }));
     },
     setActiveNote: (id) => set({ activeNoteId: id }),
+    renameFolder: (id, newName) => {
+      set((state) => ({
+        folders: state.folders.map((folder) =>
+          folder.id === id ? { ...folder, name: newName } : folder
+        ),
+      }));
+    },
   },
 });
 

@@ -1,18 +1,18 @@
 /**
  * EditNote Component Test Cases:
  *
- * 1. Note Display:
- *    - Renders existing note data correctly
- *    - Shows error state when note is not found
+ * 1. Rendering:
+ *    - Render existing note data (title and content)
+ *    - Show error state and dashboard link when note not found
  *
- * 2. Note Modifications:
- *    - Handles note title updates
- *    - Handles note content updates
- *    - Shows confirmation modal for unsaved changes
+ * 2. Note Updates:
+ *    - Update note title and shows success toast
+ *    - Update note content through editor
+ *    - Show unsaved changes confirmation modal when cancelling
  *
- * 3. Note Operations:
- *    - Handles note deletion
- *    - Shows success toasts for save/delete operations
+ * 3. Note Deletion:
+ *    - Handle note deletion
+ *    - Show success toast after deletion
  */
 
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
@@ -20,6 +20,7 @@ import EditNote from "../EditNote";
 import { useNoteStore } from "@/stores/noteStore";
 import { BrowserRouter } from "react-router-dom";
 import { toast } from "sonner";
+import { setupMockStore } from "./testUtils";
 
 // Mock the router hooks
 jest.mock("react-router-dom", () => ({
@@ -65,8 +66,7 @@ describe("EditNote", () => {
   };
 
   beforeEach(() => {
-    // Reset the store before each test
-    useNoteStore.setState({
+    setupMockStore({
       notes: [mockNote],
       actions: {
         createNote: jest.fn(),
@@ -75,6 +75,7 @@ describe("EditNote", () => {
         createFolder: jest.fn(),
         deleteFolder: jest.fn(),
         setActiveNote: jest.fn(),
+        renameFolder: jest.fn(),
       },
     });
     // Clear all mocks before each test

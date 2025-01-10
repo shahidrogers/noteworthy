@@ -1,102 +1,59 @@
 /**
  * Dashboard Page Test Cases:
  *
- * 1. Folder Operations:
- *    - Creates a new folder with given name
- *    - Deletes an existing folder
+ * 1. Folder Management:
+ *    - Create new folder
+ *    - Delete folder through dropdown menu options
+ *    - Rename folder
  *
- * 2. Note Operations:
- *    - Creates a new note within a folder
- *    - Deletes an existing note
+ * 2. Note Management:
+ *    - Create empty note within selected folder
+ *    - Delete note using trash button
  *
- * 3. Search Functionality:
- *    - Filters notes based on search query
+ * 3. Search and Filter:
+ *    - Filter notes based on search query
+ *    - Hide non-matching notes from display
  *
- * 4. Display States:
- *    - Shows empty state when no notes/folders exist
- *    - Correctly displays notes grouped by folders
- *    - Shows unfiled notes separately
+ * 4. View States:
+ *    - Display empty state message when no notes/folders exist
+ *    - Show notes properly grouped by folders
+ *    - Display unfiled (folderless) notes in separate section
  */
 
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import Dashboard from "../Dashboard";
 import { useNoteStore } from "@/stores/noteStore";
-import { Note, Folder } from "@/stores/types";
 import userEvent from "@testing-library/user-event";
-
-// Mock the useNoteStore hook
-jest.mock("@/stores/noteStore");
+import { setupMockStore } from "./testUtils";
 
 // Ensure that there's no individual mocking of crypto here.
 
-const mockedUseNoteStore = useNoteStore as jest.MockedFunction<
-  typeof useNoteStore
->;
-
-interface MockState {
-  notes: Note[];
-  folders: Folder[];
-  activeNoteId: string | null;
-  actions: {
-    createNote: jest.Mock;
-    updateNote: jest.Mock;
-    deleteNote: jest.Mock;
-    createFolder: jest.Mock;
-    deleteFolder: jest.Mock;
-    setActiveNote: jest.Mock;
-  };
-}
-
-interface MockStateOverrides {
-  notes?: Note[];
-  folders?: Folder[];
-  activeNoteId?: string | null;
-  actions?: Partial<MockState["actions"]>;
-}
-
-const defaultActions = {
-  createNote: jest.fn(),
-  updateNote: jest.fn(),
-  deleteNote: jest.fn(),
-  createFolder: jest.fn(),
-  deleteFolder: jest.fn(),
-  setActiveNote: jest.fn(),
-};
-
-const createMockState = (overrides: MockStateOverrides = {}): MockState => ({
-  notes: overrides.notes ?? [],
-  folders: overrides.folders ?? [],
-  activeNoteId: overrides.activeNoteId ?? null,
-  actions: {
-    ...defaultActions,
-    ...overrides.actions,
-  },
-});
-
 describe("Dashboard", () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    mockedUseNoteStore.mockImplementation((selector) =>
-      selector(createMockState())
-    );
+    jest.clearAllMocks();
+    setupMockStore();
   });
 
   it("should handle folder creation", async () => {
-    const mockFolder = {
-      id: "new-folder-id",
-      name: "New Folder",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    const createFolder = jest.fn().mockReturnValue(mockFolder);
-    mockedUseNoteStore.mockImplementation((selector) =>
-      selector(
-        createMockState({
-          actions: { createFolder },
-        })
-      )
-    );
+    setupMockStore({
+      folders: [],
+      actions: {
+        createNote: jest.fn(),
+        updateNote: jest.fn(),
+        deleteNote: jest.fn(),
+        createFolder: jest.fn().mockReturnValue({
+          id: "new-folder",
+          name: "New Folder",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }),
+        deleteFolder: jest.fn(),
+        setActiveNote: jest.fn(),
+        renameFolder: jest.fn(),
+      },
+    });
+    const { createFolder } = useNoteStore.getState().actions;
 
     render(
       <MemoryRouter>
@@ -124,22 +81,26 @@ describe("Dashboard", () => {
   });
 
   it("should handle folder deletion", async () => {
-    const deleteFolder = jest.fn();
-    mockedUseNoteStore.mockImplementation((selector) =>
-      selector(
-        createMockState({
-          folders: [
-            {
-              id: "1",
-              name: "Test Folder",
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            },
-          ],
-          actions: { deleteFolder },
-        })
-      )
-    );
+    useNoteStore.setState({
+      folders: [
+        {
+          id: "1",
+          name: "Test Folder",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
+      actions: {
+        createNote: jest.fn(),
+        updateNote: jest.fn(),
+        deleteNote: jest.fn(),
+        createFolder: jest.fn(),
+        deleteFolder: jest.fn(),
+        setActiveNote: jest.fn(),
+        renameFolder: jest.fn(),
+      },
+    });
+    const { deleteFolder } = useNoteStore.getState().actions;
 
     render(
       <MemoryRouter>
@@ -147,8 +108,8 @@ describe("Dashboard", () => {
       </MemoryRouter>
     );
 
-    // Find and click the ellipsis button that opens the dropdown
-    const menuButton = screen.getByRole("button", { name: "" });
+    // Find and click the ellipsis button by aria-label
+    const menuButton = screen.getByRole("button", { name: /folder options/i });
     await userEvent.click(menuButton);
 
     const deleteMenuItem = await screen.findByText("Delete Folder");
@@ -156,6 +117,48 @@ describe("Dashboard", () => {
 
     await waitFor(() => {
       expect(deleteFolder).toHaveBeenCalledWith("1");
+    });
+  });
+
+  it("should handle folder renaming", async () => {
+    const renameFolder = jest.fn();
+    useNoteStore.setState({
+      folders: [
+        {
+          id: "1",
+          name: "Old Name",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
+      actions: {
+        createNote: jest.fn(),
+        updateNote: jest.fn(),
+        deleteNote: jest.fn(),
+        createFolder: jest.fn(),
+        deleteFolder: jest.fn(),
+        setActiveNote: jest.fn(),
+        renameFolder,
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
+
+    // Click the folder name to start editing
+    const folderNameElement = screen.getByText("Old Name");
+    await userEvent.click(folderNameElement);
+
+    // Find the input and type new name
+    const input = screen.getByDisplayValue("Old Name");
+    await userEvent.clear(input);
+    await userEvent.type(input, "New Name{enter}");
+
+    await waitFor(() => {
+      expect(renameFolder).toHaveBeenCalledWith("1", "New Name");
     });
   });
 
@@ -179,9 +182,20 @@ describe("Dashboard", () => {
       },
     ];
 
-    mockedUseNoteStore.mockImplementation((selector) =>
-      selector(createMockState({ notes: mockNotes }))
-    );
+    useNoteStore.setState({
+      notes: mockNotes,
+      folders: [],
+      activeNoteId: null,
+      actions: {
+        createNote: jest.fn(),
+        updateNote: jest.fn(),
+        deleteNote: jest.fn(),
+        createFolder: jest.fn(),
+        deleteFolder: jest.fn(),
+        setActiveNote: jest.fn(),
+        renameFolder: jest.fn(),
+      },
+    });
 
     render(
       <MemoryRouter>
@@ -199,21 +213,27 @@ describe("Dashboard", () => {
   it("should handle note creation", async () => {
     const createNote = jest.fn().mockReturnValue({ id: "new-note-id" });
 
-    mockedUseNoteStore.mockImplementation((selector) =>
-      selector(
-        createMockState({
-          folders: [
-            {
-              id: "1",
-              name: "Test Folder",
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            },
-          ],
-          actions: { createNote },
-        })
-      )
-    );
+    useNoteStore.setState({
+      notes: [],
+      folders: [
+        {
+          id: "1",
+          name: "Test Folder",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
+      activeNoteId: null,
+      actions: {
+        createNote,
+        updateNote: jest.fn(),
+        deleteNote: jest.fn(),
+        createFolder: jest.fn(),
+        deleteFolder: jest.fn(),
+        setActiveNote: jest.fn(),
+        renameFolder: jest.fn(),
+      },
+    });
 
     render(
       <MemoryRouter>
@@ -244,14 +264,20 @@ describe("Dashboard", () => {
       },
     ];
 
-    mockedUseNoteStore.mockImplementation((selector) =>
-      selector(
-        createMockState({
-          notes: mockNotes,
-          actions: { deleteNote },
-        })
-      )
-    );
+    useNoteStore.setState({
+      notes: mockNotes,
+      folders: [],
+      activeNoteId: null,
+      actions: {
+        createNote: jest.fn(),
+        updateNote: jest.fn(),
+        deleteNote,
+        createFolder: jest.fn(),
+        deleteFolder: jest.fn(),
+        setActiveNote: jest.fn(),
+        renameFolder: jest.fn(),
+      },
+    });
 
     render(
       <MemoryRouter>
@@ -269,9 +295,20 @@ describe("Dashboard", () => {
   });
 
   it("should show empty state when no notes or folders exist", () => {
-    mockedUseNoteStore.mockImplementation((selector) =>
-      selector(createMockState({ notes: [], folders: [] }))
-    );
+    useNoteStore.setState({
+      notes: [],
+      folders: [],
+      activeNoteId: null,
+      actions: {
+        createNote: jest.fn(),
+        updateNote: jest.fn(),
+        deleteNote: jest.fn(),
+        createFolder: jest.fn(),
+        deleteFolder: jest.fn(),
+        setActiveNote: jest.fn(),
+        renameFolder: jest.fn(),
+      },
+    });
 
     render(
       <MemoryRouter>
@@ -310,14 +347,20 @@ describe("Dashboard", () => {
       },
     ];
 
-    mockedUseNoteStore.mockImplementation((selector) =>
-      selector(
-        createMockState({
-          notes: mockNotes,
-          folders: mockFolders,
-        })
-      )
-    );
+    useNoteStore.setState({
+      notes: mockNotes,
+      folders: mockFolders,
+      activeNoteId: null,
+      actions: {
+        createNote: jest.fn(),
+        updateNote: jest.fn(),
+        deleteNote: jest.fn(),
+        createFolder: jest.fn(),
+        deleteFolder: jest.fn(),
+        setActiveNote: jest.fn(),
+        renameFolder: jest.fn(),
+      },
+    });
 
     render(
       <MemoryRouter>

@@ -1,24 +1,21 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Plus, FolderOpen, Ellipsis } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { CreateFolderModal } from "@/components/modals/CreateFolderModal";
+import { Search } from "lucide-react";
+import { toast } from "sonner";
+
 import { useNoteStore } from "@/stores/noteStore";
 import { Note } from "@/stores/types";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
+
+import { Input } from "@/components/ui/input";
+import { CreateFolderModal } from "@/components/modals/CreateFolderModal";
 import { NoteCard } from "@/components/cards/NoteCard";
 import { DashboardEmptyState } from "@/components/sections/DashboardEmptyState";
+import { FolderHeader } from "@/components/sections/FolderHeader";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
 
   // Access store pieces individually with default values
   const notes = useNoteStore((state) => state.notes ?? []);
@@ -27,6 +24,7 @@ export default function Dashboard() {
   const createFolder = useNoteStore((state) => state.actions.createFolder);
   const deleteNote = useNoteStore((state) => state.actions.deleteNote);
   const deleteFolder = useNoteStore((state) => state.actions.deleteFolder);
+  const renameFolder = useNoteStore((state) => state.actions.renameFolder);
 
   // Group notes by folder with safeguard
   const notesByFolder = (notes || []).reduce((acc, note) => {
@@ -58,6 +56,7 @@ export default function Dashboard() {
       navigate(`/note/${newNote.id}`);
     } catch (error) {
       console.error("Failed to create note:", error);
+      toast.error("Failed to create note");
     }
   };
 
@@ -87,6 +86,14 @@ export default function Dashboard() {
     toast.success("Folder deleted");
   };
 
+  const handleRenameFolder = (folderId: string, newName: string) => {
+    if (newName.trim()) {
+      renameFolder(folderId, newName.trim());
+      toast.success("Folder renamed");
+    }
+    setEditingFolderId(null);
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -99,19 +106,22 @@ export default function Dashboard() {
       <div className="relative">
         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search notes..."
+          placeholder={
+            notes.length ? "Search notes..." : "No notes to search yet.."
+          }
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-10"
+          disabled={notes.length === 0}
         />
       </div>
 
       {/* Display all folders, even empty ones */}
       <div className="space-y-8">
-        {/* First show unfiled notes if they exist */}
+        {/* First, show unfiled notes if they exist */}
         {notesByFolder["unfiled"]?.length > 0 && (
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Unfiled Notes</h2>
+            <h2 className="text-xl font-semibold text-left">Unfiled Notes</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {filterNotes(notesByFolder["unfiled"]).map((note) => (
                 <NoteCard
@@ -131,42 +141,16 @@ export default function Dashboard() {
 
           return (
             <div key={folder.id} className="space-y-4">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <FolderOpen className="h-5 w-5 text-muted-foreground" />
-                  <h2 className="text-xl font-semibold">{folder.name}</h2>
-                  <span className="text-sm text-muted-foreground">
-                    ({folderNotes.length}{" "}
-                    {folderNotes.length === 1 ? "note" : "notes"})
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleCreateNote(folder.id)}
-                  >
-                    <Plus className="h-4 w-4" />
-                    New Note
-                  </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <Ellipsis className="mr-2 h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem
-                        onClick={() => handleDeleteFolder(folder.id)}
-                        className="text-red-500"
-                      >
-                        <FolderOpen className="h-4 w-4" />
-                        Delete Folder
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
+              <FolderHeader
+                folderId={folder.id}
+                folderName={folder.name}
+                notesCount={folderNotes.length}
+                isEditing={editingFolderId === folder.id}
+                onEditStart={() => setEditingFolderId(folder.id)}
+                onRename={(newName) => handleRenameFolder(folder.id, newName)}
+                onDelete={() => handleDeleteFolder(folder.id)}
+                onCreateNote={() => handleCreateNote(folder.id)}
+              />
 
               {filteredNotes.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">

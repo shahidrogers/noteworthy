@@ -17,6 +17,7 @@ module.exports = {
   transformIgnorePatterns: [
     "/node_modules/(?!(@radix-ui|@testing-library|lucide-react)/)",
   ],
+  testPathIgnorePatterns: ["/testUtils\\.ts$"],
   // Remove or correct the testEnvironmentOptions
   // testEnvironmentOptions: {
   //   customExportConditions: [""],

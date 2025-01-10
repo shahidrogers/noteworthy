@@ -1,5 +1,9 @@
 # Noteworthy App
 
+A simple note-taking application using React 18 + Vite + Tailwind/Shadcn.
+
+[View deployed app here](https://noteworthy-local.netlify.app/)
+
 ## Table of Contents
 
 - [Tech Stack](#tech-stack)
@@ -10,8 +14,6 @@
 - [Testing](#testing)
 - [Build](#build)
 
-A simple note-taking application.
-
 ## Tech Stack
 
 - **Frontend Framework**: React 18 with Vite
@@ -19,6 +21,7 @@ A simple note-taking application.
 - **State Management**: Zustand
 - **Testing**: Jest + React Testing Library
 - **Styling**: TailwindCSS + Shadcn (using some RadixUI primitives) + Lucide-react icons
+- **Aninmation**: framer-motion
 - **Opinionated Toasts**: Sonner
 - **Rich Text Editor**: Tiptap + minimal-tiptap
 
@@ -29,11 +32,12 @@ A simple note-taking application.
 - Search functionality
 - Rich text support for note content
 - Local storage persistence (basic security with AES-GCM encryption)
+- [State synchronization](#state-synchronization) (Cross-tab/window only)
 
 ## Future enhancements
 
-- Drag + drop capability to re-order notes/folders and to move notes from one folder to another
-- Conflict resolution
+- [ ] Drag + drop capability to re-order notes/folders and to move notes from one folder to another
+- [ ] Conflict resolution
 
 ## State Synchronization
 
@@ -75,12 +79,6 @@ The app will be available at `http://localhost:5173`
 ```bash
 # Run all tests
 npm test
-
-# Run tests with coverage
-npm test -- --coverage
-
-# Run tests in watch mode
-npm test -- --watch
 ```
 
 ### Test Coverage
@@ -89,7 +87,7 @@ The test suite covers:
 
 - Component rendering and interactions
 - State management logic
-- Note CRUD operations
+- Note/Folder CRUD operations
 - Search functionality
 - Data persistence
 
